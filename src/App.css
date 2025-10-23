@@ -6,3 +6,14 @@
   bottom: 0;
   width: 100%;
 }
+.weather-data {
+  display: flex;
+  padding: 10px;
+  background-color: #e0f7fa;
+  z-index: 100;
+  margin-top: 65%;
+}
+#root {
+  width: 100svw;
+  height: 100svh;
+}
