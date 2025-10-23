@@ -1,7 +1,7 @@
 import "../App.css";
-export function Footer() {
+export default function Footer() {
   return (
-    <footer>
+    <footer className="footer">
       <p>© 2024 Bergen App. All rights reserved.</p>
     </footer>
   );
