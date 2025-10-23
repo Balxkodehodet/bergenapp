@@ -31,7 +31,7 @@ export default function GetBergenTemp() {
         <>
           <div className="weather-data">
             <p>
-              Temperatur i Bergen:{" "}
+              Temp idag i Bergen:{" "}
               <strong>
                 {
                   weatherData.properties.timeseries[2].data.instant.details

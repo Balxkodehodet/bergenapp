@@ -11,9 +11,18 @@
   padding: 10px;
   background-color: #e0f7fa;
   z-index: 100;
-  margin-top: 65%;
+  margin-top: 50%;
+}
+strong {
+  font-size: 2em;
 }
 #root {
   width: 100svw;
   height: 100svh;
+}
+.overskrift {
+  color: darkblue;
+}
+.tid-header {
+  padding: 10px;
 }

@@ -9,8 +9,8 @@ function App() {
   return (
     <AppProvider>
       <>
+        <h1 className="overskrift">Bergen App</h1>
         <TimeDate />
-        <p>Bergen App</p>
         <GetBergenTemp />
         <Footer />
       </>
