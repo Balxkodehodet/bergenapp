@@ -1,61 +1,56 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { AppContext } from "./AppContext.jsx";
 import "../App.css";
 
 export default function GetBergenTemp() {
   const { sykkelData, setSykkelData } = useContext(AppContext);
+  const [randomStation, setRandomStation] = useState(null);
   let data;
   useEffect(() => {
     async function fetchBikeData() {
       const res = await fetch("http://localhost:3001/api/bike-data");
       const data = await res.json();
-      setSykkelData(data);
+      setSykkelData(data); // save full array in context
+
+      // pick initial random station
+      setRandomStation(data[Math.floor(Math.random() * data.length)]);
+
+      // start interval to update random station
+      const interval = setInterval(() => {
+        const randomNr = Math.floor(Math.random() * data.length);
+        console.log("Random number:", randomNr);
+        setRandomStation(data[randomNr]);
+      }, 30000);
+
+      return () => clearInterval(interval);
     }
+
     fetchBikeData();
   }, []);
 
-  let address = "";
-  let numBikesAvailable = 0;
-  let numDocksAvailable = 0;
-  let name = "";
-  let x_street = "";
-
-  useEffect(() => {
-    let randomNr;
-    setInterval(() => {
-      randomNr = Math.floor(Math.random() * sykkelData.length);
-      console.log("randomNr: ", randomNr);
-    }, 10000);
-    address = data[randomNr].address;
-    numBikesAvailable = data[randomNr].num_bikes_available;
-    numDocksAvailable = data[randomNr].num_docks_available;
-    name = data[randomNr].name;
-    x_street = data[randomNr].x_street;
-  }, []);
-
-  console.log("addresse: ", address);
-  console.log("navn: ", name);
-  console.log("x_street: ", x_street);
-  console.log("numBikesAvailable: ", numBikesAvailable);
-  console.log("numDocksAvailable: ", numDocksAvailable);
   return (
     <>
-      {!sykkelData ? (
+      {!randomStation ? (
         <p>Laster data...</p>
       ) : (
         <>
           <div className="bike-data">
             <p>
-              Navn: <strong>{name}</strong>
+              {randomStation.num_docks_available > 0
+                ? "plasser med mer enn 0 sykler:"
+                : "Plasser med ingen ledige sykler"}
               <br></br>
-              Addresse: <strong>{address}</strong>
+              Navn: <strong>{randomStation.name}</strong>
               <br></br>
-              Antall sykler tilgjengelig: <strong>{numBikesAvailable}</strong>
+              Addresse: <strong>{randomStation.address}</strong>
+              <br></br>
+              Antall sykler tilgjengelig:{" "}
+              <strong>{randomStation.num_bikes_available}</strong>
               <br></br>
               Antall oppbevaringsplasser tilgjengelig:{" "}
-              <strong>{numDocksAvailable}</strong>
+              <strong>{randomStation.num_docks_available}</strong>
               <br></br>
-              x_street: <strong>{x_street}</strong>
+              x_street: <strong>{randomStation.cross_street}</strong>
             </p>
           </div>
         </>
