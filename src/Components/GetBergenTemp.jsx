@@ -7,14 +7,14 @@ export default function GetBergenTemp() {
   console.log("Weather data from context:", weatherData);
   useEffect(() => {
     async function fetchTemp() {
-      const res = await fetch("http://localhost:3000/api/bergen-temp");
+      const res = await fetch("http://localhost:3001/api/bergen-temp");
       const data = await res.json();
       console.log(
         "Bergen temperature data:",
         data,
-        data.properties.timeseries[0].data.instant.details.air_temperature,
-        data.properties.timeseries[1].data.instant.details.air_temperature,
-        data.properties.timeseries[2].data.instant.details.air_temperature
+        data.properties.timeseries[2].data.instant.details.air_temperature,
+        data.properties.timeseries[3].data.instant.details.air_temperature,
+        data.properties.timeseries[4].data.instant.details.air_temperature
       );
       setWeatherData(data);
     }
