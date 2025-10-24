@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "Mg7qRLLpAFQ=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\jvsan\\OneDrive\\Dokumenter\\Alt viktig\\Kodehode\\Gruppeprosjekt\\bergenapp\\backend\\BergenCollectionApi\\BergenCollectionApi.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jvsan\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.9\\microsoft.aspnetcore.openapi.9.0.9.nupkg.sha512",
+    "C:\\Users\\jvsan\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
