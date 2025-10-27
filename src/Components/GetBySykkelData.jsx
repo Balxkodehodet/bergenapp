@@ -5,7 +5,9 @@ import "../App.css";
 export default function GetBergenTemp() {
   const { sykkelData, setSykkelData } = useContext(AppContext);
   const [randomStation, setRandomStation] = useState(null);
-  let data;
+  const [selectedOption, setSelectedOption] = useState("");
+  const [interval, setInterval] = useState(null);
+
   useEffect(() => {
     async function fetchBikeData() {
       const res = await fetch("http://localhost:3001/api/bike-data");
@@ -16,11 +18,13 @@ export default function GetBergenTemp() {
       setRandomStation(data[Math.floor(Math.random() * data.length)]);
 
       // start interval to update random station
-      const interval = setInterval(() => {
-        const randomNr = Math.floor(Math.random() * data.length);
-        console.log("Random number:", randomNr);
-        setRandomStation(data[randomNr]);
-      }, 30000);
+      setInterval(
+        setInterval(() => {
+          const randomNr = Math.floor(Math.random() * data.length);
+          console.log("Random number:", randomNr);
+          setRandomStation(data[randomNr]);
+        }, 5000)
+      );
 
       return () => clearInterval(interval);
     }
@@ -28,28 +32,93 @@ export default function GetBergenTemp() {
     fetchBikeData();
   }, []);
 
+  function handleZeroBikes() {
+    clearInterval(interval);
+    const filteredStations = sykkelData.filter(
+      (station) =>
+        station.num_bikes_available === 0 && station.num_docks_available > 0
+    );
+    const randomNr = Math.floor(Math.random() * filteredStations.length);
+    setRandomStation(filteredStations[randomNr]);
+    console.log(
+      "Filtered  zero bikes but above 0 available dock stations:",
+      filteredStations
+    );
+  }
+  function handleBikes() {
+    clearInterval(interval);
+    const filteredStations = sykkelData.filter(
+      (station) => station.num_bikes_available > 0
+    );
+    const randomNr = Math.floor(Math.random() * filteredStations.length);
+    setRandomStation(filteredStations[randomNr]);
+    console.log(
+      "Filtered more than 0 bikes available stations:",
+      filteredStations
+    );
+  }
+  function handleRandomBikes() {
+    const randomNr = Math.floor(Math.random() * sykkelData.length);
+    console.log("Random number:", randomNr);
+    setRandomStation(sykkelData[randomNr]);
+  }
+  function handleSubmit(event) {
+    event.preventDefault();
+    clearInterval(interval);
+    console.log("Form submitted, selected option:", event.target[0].value);
+    const selectedStation = sykkelData.find(
+      (station) => station.name === event.target[0].value
+    );
+    setRandomStation(selectedStation);
+    console.log("Selected station:", selectedStation);
+  }
   return (
     <>
       {!randomStation ? (
         <p>Laster data...</p>
       ) : (
         <>
+          <div className="bike-formdata">
+            <form onSubmit={handleSubmit}>
+              <label>
+                Velg
+                <select>
+                  {sykkelData.map((station) => (
+                    <option key={station.station_id} value={station.name}>
+                      {station.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button type="submit">Søk</button>
+            </form>
+            <button type="button" onClick={handleBikes}>
+              Plasser med over 0 sykler
+            </button>
+            <button type="button" onClick={handleZeroBikes}>
+              Tilgjengelige plasser
+            </button>
+            <button type="button" onClick={handleRandomBikes}>
+              Tilfeldig stasjon
+            </button>
+            <br></br>
+          </div>
           <div className="bike-data">
             <p>
-              {randomStation.num_docks_available > 0
-                ? "plasser med mer enn 0 sykler:"
-                : "Plasser med ingen ledige sykler"}
-              <br></br>
               Navn: <strong>{randomStation.name}</strong>
-              <br></br>
+            </p>
+            <p>
               Addresse: <strong>{randomStation.address}</strong>
-              <br></br>
+            </p>
+            <p>
               Antall sykler tilgjengelig:{" "}
               <strong>{randomStation.num_bikes_available}</strong>
-              <br></br>
+            </p>
+            <p>
               Antall oppbevaringsplasser tilgjengelig:{" "}
               <strong>{randomStation.num_docks_available}</strong>
-              <br></br>
+            </p>
+            <p>
               x_street: <strong>{randomStation.cross_street}</strong>
             </p>
           </div>

@@ -1,3 +1,8 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 .footer {
   background-color: #f1f1f1;
   text-align: center;
@@ -8,21 +13,50 @@
 }
 .weather-data {
   display: flex;
-  padding: 10px;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
   background-color: #e0f7fa;
   z-index: 100;
-  margin-top: 16%;
-}
-strong {
-  font-size: 2em;
+  width: 100%;
+  height: auto;
+  border: 2px solid #00796b;
 }
 #root {
   width: 100svw;
   height: 100svh;
 }
 .overskrift {
+  margin-left: 10px;
+  margin-bottom: 10px;
   color: darkblue;
 }
 .tid-header {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
   padding: 10px;
+  border-radius: 5px;
+}
+.bike-data {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+.bike-formdata {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+button {
+  margin-top: 5px;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
 }
