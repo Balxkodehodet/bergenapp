@@ -17,7 +17,7 @@ public class BikeController : ControllerBase
     }
 
     [HttpGet("bike-data")]
-    public async Task<IActionResult> GetBikeData()
+    public async Task<IActionResult> GetBikeData([FromQuery] BikeStationQuery query)
     {
         try
         {
@@ -25,7 +25,7 @@ public class BikeController : ControllerBase
             var stationInfoUrl = "https://gbfs.urbansharing.com/bergenbysykkel.no/station_information.json";
 
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "balx042025@gmail.com");
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "BergenApp/1.0 (balx042025@gmail.com)");
 
             var statusTask = _httpClient.GetStringAsync(stationStatUrl);
             var infoTask = _httpClient.GetStringAsync(stationInfoUrl);
@@ -64,7 +64,18 @@ public class BikeController : ControllerBase
                 return result;
             }).ToList();
 
-            return Ok(merged);
+            IEnumerable<Dictionary<string, object>> filtered = merged;
+
+            if (query.MinBikes.HasValue)
+                filtered = filtered.Where(s => s.ContainsKey("num_bikes_available") && Convert.ToInt32(s["num_bikes_available"]) >= query.MinBikes.Value);
+
+            // Example location filter (implement GetDistanceKm as needed)
+            if (query.Lat.HasValue && query.Lon.HasValue && query.RadiusKm.HasValue)
+                filtered = filtered.Where(s =>
+                    s.ContainsKey("lat") && s.ContainsKey("lon") &&
+                    GetDistanceKm(Convert.ToDouble(s["lat"]), Convert.ToDouble(s["lon"]), query.Lat.Value, query.Lon.Value) <= query.RadiusKm.Value);
+
+            return Ok(filtered.ToList());
         }
         catch (Exception ex)
         {
@@ -84,5 +95,21 @@ public class BikeController : ControllerBase
             JsonValueKind.Null => null,
             _ => element.ToString()
         };
+    }
+
+    private static double GetDistanceKm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double R = 6371; // Earth radius in kilometers
+        var latRad1 = Math.PI * lat1 / 180.0;
+        var latRad2 = Math.PI * lat2 / 180.0;
+        var deltaLat = Math.PI * (lat2 - lat1) / 180.0;
+        var deltaLon = Math.PI * (lon2 - lon1) / 180.0;
+
+        var a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
+                Math.Cos(latRad1) * Math.Cos(latRad2) *
+                Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
+
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
     }
 }

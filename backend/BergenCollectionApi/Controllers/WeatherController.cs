@@ -24,8 +24,7 @@ public class WeatherController : ControllerBase
             var url = "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=60.3913&lon=5.3221";
 
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "balx042025@gmail.com");
-
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "BergenApp/1.0 (balx042025@gmail.com)");
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 
