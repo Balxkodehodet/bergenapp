@@ -47,7 +47,7 @@ public class BikeController : ControllerBase
                 var result = new Dictionary<string, object>();
 
                 // Add info properties first
-                if (matchingInfo.ValueKind != JsonValueKind.Undefined)
+                if (matchingInfo.ValueKind == JsonValueKind.Object)
                 {
                     foreach (var prop in matchingInfo.EnumerateObject())
                     {
@@ -73,7 +73,7 @@ public class BikeController : ControllerBase
         }
     }
 
-    private static object GetJsonValue(JsonElement element)
+    private static object? GetJsonValue(JsonElement element)
     {
         return element.ValueKind switch
         {
