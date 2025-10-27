@@ -39,7 +39,7 @@ app.get("/api/bike-data", async (req, res) => {
 
     let options = {
       headers: {
-        "User-Agent": "balx042025@gmail.com", // MET Norway requires a User-Agent
+        "User-Agent": "balx042025@gmail.com", //
       },
     };
 
@@ -62,6 +62,49 @@ app.get("/api/bike-data", async (req, res) => {
   }
 });
 
+app.get("/api/buss-data", async (req, res) => {
+  try {
+    const query = `
+{
+  stopPlace(id: "NSR:StopPlace:62356") {
+    name
+    estimatedCalls(timeRange: 7200, numberOfDepartures: 5) {
+      realtime
+      aimedDepartureTime
+      expectedDepartureTime
+      destinationDisplay {
+        frontText
+      }
+      serviceJourney {
+        line {
+          id
+          name
+          transportMode
+        }
+      }
+    }
+  }
+}
+`;
+
+    const response = await fetch(
+      "https://api.entur.io/journey-planner/v3/graphql",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ET-Client-Name": "student/Bergen-app", // required header
+        },
+        body: JSON.stringify({ query }),
+      }
+    );
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("Error fetching :", err);
+    res.status(500).json({ error: "Failed to fetch" });
+  }
+});
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () =>
   console.log(`✅ Server running on http://localhost:${PORT}`)

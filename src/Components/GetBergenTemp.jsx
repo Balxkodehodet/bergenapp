@@ -32,30 +32,39 @@ export default function GetBergenTemp() {
           <div className="weather-data">
             <p>
               Temp idag i Bergen:{" "}
-              <strong>
+              <b>
                 {
                   weatherData.properties.timeseries[2].data.instant.details
                     .air_temperature
                 }
                 °C
-              </strong>
-              <br></br> Om 1 time:{" "}
-              <strong>
+              </b>
+            </p>
+
+            <p>
+              {" "}
+              Om 1 time:{" "}
+              <b>
                 {
                   weatherData.properties.timeseries[3].data.instant.details
                     .air_temperature
                 }
                 °C
-              </strong>
-              <br></br> Om 2 timer:{" "}
-              <strong>
+              </b>
+            </p>
+
+            <p>
+              {" "}
+              Om 2 timer:{" "}
+              <b>
                 {
                   weatherData.properties.timeseries[4].data.instant.details
                     .air_temperature
                 }
                 °C
-              </strong>
+              </b>
             </p>
+            <h1 className="overskrift">Bergen App</h1>
           </div>
         </>
       )}
