@@ -13,6 +13,48 @@ export default function GetBusData() {
     }
     fetchBusData();
   }, []);
-
-  return <>{!busData ? <p>Laster data...</p> : <></>}</>;
+  let busdepartures = [];
+  if (busData) {
+    busdepartures = busData.data.stopPlace.estimatedCalls.filter(
+      (transport) => {
+        return (
+          transport.serviceJourney.line.transportMode.toLowerCase() ===
+          "BUS".toLowerCase()
+        );
+      }
+    );
+  }
+  return (
+    <>
+      {!busData ? (
+        <p>Laster data...</p>
+      ) : (
+        <>
+          <div className="bus-data">
+            <h2>{busData.data.stopPlace.name}</h2>
+            <div>
+              {busdepartures.map((bus, index) => (
+                <p key={index}>
+                  Buss til: <b>{bus.destinationDisplay.frontText}</b>
+                  <br></br>
+                  Forventet avgangstid:{" "}
+                  <b>
+                    {bus.expectedDepartureTime
+                      .replace("T", " Kl:")
+                      .replace("+01:00", " ")}
+                  </b>
+                  <br></br>
+                  Linje:
+                  <b>
+                    {bus.serviceJourney.line.id.replace("SKY:Line:", "") + " "}
+                  </b>
+                  <hr></hr>
+                </p>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
 }
