@@ -16,6 +16,9 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
+builder.Services.AddSingleton<BikeDataCache>();
+builder.Services.AddHostedService<BikeDataFetcher>();
+
 var app = builder.Build();
 
 // Pipeline
