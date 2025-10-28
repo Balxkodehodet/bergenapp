@@ -6,7 +6,7 @@ export default function GetBusData() {
   console.log("Bus data from context:", busData);
   useEffect(() => {
     async function fetchBusData() {
-      const res = await fetch("http://localhost:3001/api/buss-data");
+      const res = await fetch("http://localhost:5049/api/buss-data");
       const data = await res.json();
       console.log("Data fetched of bus data", data);
       setBusData(data);
@@ -32,9 +32,9 @@ export default function GetBusData() {
         <>
           <div className="bus-data">
             <h2>{busData.data.stopPlace.name}</h2>
-            <div>
-              {busdepartures.map((bus, index) => (
-                <p key={index}>
+            {busdepartures.map((bus, index) => (
+              <div key={index}>
+                <p>
                   Buss til: <b>{bus.destinationDisplay.frontText}</b>
                   <br></br>
                   Forventet avgangstid:{" "}
@@ -48,10 +48,10 @@ export default function GetBusData() {
                   <b>
                     {bus.serviceJourney.line.id.replace("SKY:Line:", "") + " "}
                   </b>
-                  <hr></hr>
                 </p>
-              ))}
-            </div>
+                <hr></hr>
+              </div>
+            ))}
           </div>
         </>
       )}

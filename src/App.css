@@ -22,12 +22,14 @@
   width: 100%;
   height: auto;
   border: 2px solid #00796b;
+  border-radius: 5px;
 }
 #root {
   width: 100svw;
   height: 100svh;
 }
 .overskrift {
+  order: 0;
   margin-left: 10px;
   margin-bottom: 10px;
   color: darkblue;
@@ -65,4 +67,9 @@ button {
   border: 2px solid #110c01;
   padding: 10px;
   border-radius: 5px;
+}
+@media only screen and (max-width: 600px) {
+  .weather-data p {
+    order: 1;
+  }
 }

@@ -10,7 +10,7 @@ export default function GetBergenTemp() {
 
   useEffect(() => {
     async function fetchBikeData() {
-      const res = await fetch("http://localhost:3001/api/bike-data");
+      const res = await fetch("http://localhost:5049/api/bike-data");
       const data = await res.json();
       setSykkelData(data); // save full array in context
 
@@ -23,7 +23,7 @@ export default function GetBergenTemp() {
           const randomNr = Math.floor(Math.random() * data.length);
           console.log("Random number:", randomNr);
           setRandomStation(data[randomNr]);
-        }, 5000)
+        }, 15000)
       );
 
       return () => clearInterval(interval);
