@@ -68,7 +68,7 @@ app.get("/api/buss-data", async (req, res) => {
 {
   stopPlace(id: "NSR:StopPlace:62356") {
     name
-    estimatedCalls(timeRange: 7200, numberOfDepartures: 5) {
+    estimatedCalls(timeRange: 7200, numberOfDepartures: 15) {
       realtime
       aimedDepartureTime
       expectedDepartureTime

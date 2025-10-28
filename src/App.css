@@ -7,7 +7,6 @@
   background-color: #f1f1f1;
   text-align: center;
   padding: 10px 0;
-  position: fixed;
   bottom: 0;
   width: 100%;
 }
@@ -41,6 +40,13 @@
   border-radius: 5px;
 }
 .bike-data {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+.bus-data {
   margin-top: 10px;
   background-color: #e0f7fa;
   border: 2px solid #110c01;

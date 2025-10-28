@@ -79,6 +79,7 @@ export default function GetBergenTemp() {
       ) : (
         <>
           <div className="bike-formdata">
+            <h2>Bergen bysykler:</h2>
             <form onSubmit={handleSubmit}>
               <label>
                 Velg
