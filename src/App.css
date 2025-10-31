@@ -1,0 +1,75 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.footer {
+  background-color: #f1f1f1;
+  text-align: center;
+  padding: 10px 0;
+  bottom: 0;
+  width: 100%;
+}
+.weather-data {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+  background-color: #e0f7fa;
+  z-index: 100;
+  width: 100%;
+  height: auto;
+  border: 2px solid #00796b;
+  border-radius: 5px;
+}
+#root {
+  width: 100svw;
+  height: 100svh;
+}
+.overskrift {
+  order: 0;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  color: darkblue;
+}
+.tid-header {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+.bike-data {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+.bus-data {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+.bike-formdata {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+button {
+  margin-top: 5px;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+@media only screen and (max-width: 600px) {
+  .weather-data p {
+    order: 1;
+  }
+}
