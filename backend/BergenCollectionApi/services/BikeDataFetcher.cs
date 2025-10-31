@@ -25,7 +25,11 @@ public class BikeDataFetcher : BackgroundService
                 var stationInfoUrl = "https://gbfs.urbansharing.com/bergenbysykkel.no/station_information.json";
 
                 httpClient.DefaultRequestHeaders.Clear();
+<<<<<<< HEAD
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "BergenApp/1.0 (balx042025@gmail.com)");
+=======
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "BergenApp/1.0 (USER_AGENT_EMAIL)");
+>>>>>>> origin/jaurund-backend
 
                 var statusTask = httpClient.GetStringAsync(stationStatUrl, stoppingToken);
                 var infoTask = httpClient.GetStringAsync(stationInfoUrl, stoppingToken);
@@ -50,14 +54,21 @@ public class BikeDataFetcher : BackgroundService
                     {
                         foreach (var prop in matchingInfo.EnumerateObject())
                         {
-                            result[prop.Name] = GetJsonValue(prop.Value);
+                            if (prop.Name != null)
+                                result[prop.Name] = GetJsonValue(prop.Value)!;
+                            else Console.WriteLine("ERROR: invalid JSON. Static data (station_id) from bike stations not recieved");
                         }
+
                     }
                     foreach (var prop in station.EnumerateObject())
                     {
-                        result[prop.Name] = GetJsonValue(prop.Value);
+                        if (prop.Name != null)
+                            result[prop.Name] = GetJsonValue(prop.Value)!;
+                        else Console.WriteLine("ERROR: invalid JSON. Live data (station_status) from bike stations not recieved.");
+
                     }
                     return result;
+
                 }).ToList();
 
                 _cache.Set(merged);
