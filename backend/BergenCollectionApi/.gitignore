@@ -46,6 +46,8 @@ Generated\ Files/
 
 # Ignore all files in database/zipCache but keep the folder
 database/zipCache/*
+database/zipCache/*.txt
+database/zipCache/*.zip
 !database/zipCache/.gitkeep
 
 # MSTest test Results
