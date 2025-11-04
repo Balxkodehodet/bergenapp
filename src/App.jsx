@@ -5,15 +5,16 @@ import GetBergenTemp from "./Components/GetBergenTemp.jsx";
 import { AppProvider } from "./Components/AppContext";
 import TimeDate from "./Components/TimeDate.jsx";
 import GetBySykkelData from "./Components/GetBySykkelData.jsx";
+import GetBusData from "./Components/GetBusData.jsx";
 
 function App() {
   return (
     <AppProvider>
       <>
-        <h1 className="overskrift">Bergen App</h1>
-        <TimeDate />
-        <GetBySykkelData />
         <GetBergenTemp />
+        <TimeDate />
+        <GetBusData />
+        <GetBySykkelData />
         <Footer />
       </>
     </AppProvider>
