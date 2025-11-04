@@ -21,6 +21,7 @@ DotNetEnv.Env.Load();
 
 builder.Services.AddSingleton<BikeDataCache>();
 builder.Services.AddHostedService<BikeDataFetcher>();
+builder.Services.AddHostedService<StopDataImporter>(); // Add this line
 
 builder.Services.AddDbContext<StopsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("StopsDb")));
