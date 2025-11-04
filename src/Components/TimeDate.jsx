@@ -11,7 +11,7 @@ export default function TimeDate() {
         <p>Laster data...</p>
       ) : (
         <h2 className="tid-header">
-          Vær sist oppdatert:<br></br>{" "}
+          Værdata vises for tid:<br></br>{" "}
           {weatherData.properties.timeseries[2].time
             .replace("T", " Tid: ")
             .replace("Z", " ")}
