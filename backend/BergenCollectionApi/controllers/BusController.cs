@@ -10,11 +10,13 @@ public class BusController : ControllerBase
 {
   private readonly HttpClient _httpClient;
   private readonly ILogger<BusController> _logger;
+  private readonly StopsDbContext _dbContext; // Add this
 
-  public BusController(HttpClient httpClient, ILogger<BusController> logger)
+  public BusController(HttpClient httpClient, ILogger<BusController> logger, StopsDbContext dbContext) // Add dbContext parameter
   {
     _httpClient = httpClient;
     _logger = logger;
+    _dbContext = dbContext; // Add this
   }
 
   [HttpGet("bus-departures")]
@@ -194,6 +196,94 @@ public class BusController : ControllerBase
       results = results,
       requestedAt = DateTime.UtcNow
     });
+  }
+
+  [HttpGet("bus-departures-by-name")]
+  public async Task<IActionResult> GetBusDeparturesByStopName(
+      [FromQuery] string stopName,
+      [FromQuery] int timeRange = 7200,
+      [FromQuery] int numberOfDepartures = 15)
+  {
+    if (string.IsNullOrWhiteSpace(stopName))
+    {
+      return BadRequest(new { error = "Please provide a stop name." });
+    }
+
+    try
+    {
+      // First, find the stop by name using your StopsDbContext
+      var matchingStops = _dbContext.Stops
+          .Where(s => s.StopName.Contains(stopName))
+          .Select(s => new { s.StopId, s.StopName })
+          .ToList();
+
+      if (!matchingStops.Any())
+      {
+        return NotFound(new { error = $"No stops found matching '{stopName}'" });
+      }
+
+      // Use the first matching stop for now
+      var selectedStop = matchingStops.First();
+
+      // Now get bus departure data using the existing logic
+      var query = $@"
+          {{
+            stopPlace(id: ""{selectedStop.StopId}"") {{
+              name
+              id
+              estimatedCalls(timeRange: {timeRange}, numberOfDepartures: {numberOfDepartures}) {{
+                realtime
+                aimedDepartureTime
+                expectedDepartureTime
+                destinationDisplay {{
+                  frontText
+                }}
+                serviceJourney {{
+                  line {{
+                    id
+                    name
+                    transportMode
+                  }}
+                }}
+              }}
+            }}
+          }}";
+
+      var requestBody = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json");
+
+      var request = new HttpRequestMessage(HttpMethod.Post, "https://api.entur.io/journey-planner/v3/graphql")
+      {
+        Content = requestBody
+      };
+      request.Headers.Add("ET-Client-Name", "student/Bergen-app");
+
+      var response = await _httpClient.SendAsync(request);
+      response.EnsureSuccessStatusCode();
+
+      var content = await response.Content.ReadAsStringAsync();
+      var data = JsonSerializer.Deserialize<JsonElement>(content);
+
+      // Validate response structure
+      if (!data.TryGetProperty("data", out var dataElement) ||
+          !dataElement.TryGetProperty("stopPlace", out var stopPlaceElement) ||
+          stopPlaceElement.ValueKind == JsonValueKind.Null)
+      {
+        return NotFound(new { error = $"Stop {selectedStop.StopId} not found or inactive" });
+      }
+
+      return Ok(new
+      {
+        stopId = selectedStop.StopId,
+        stopName = selectedStop.StopName,
+        data = stopPlaceElement,
+        requestedAt = DateTime.UtcNow
+      });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error fetching bus departures by stop name");
+      return StatusCode(500, new { error = "Failed to fetch bus departures" });
+    }
   }
 }
 
