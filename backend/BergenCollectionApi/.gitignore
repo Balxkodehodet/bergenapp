@@ -50,6 +50,9 @@ database/zipCache/*.txt
 database/zipCache/*.zip
 !database/zipCache/.gitkeep
 
+# Ignore all zip files in database folder
+database/*.zip
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
