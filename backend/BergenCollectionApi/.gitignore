@@ -52,6 +52,12 @@ database/zipCache/*.txt
 database/zipCache/*.zip
 !database/zipCache/.gitkeep
 
+<<<<<<< HEAD
+>>>>>>> origin/jaurund-backend
+=======
+# Ignore all zip files in database folder
+database/*.zip
+
 >>>>>>> origin/jaurund-backend
 # MSTest test Results
 [Tt]est[Rr]esult*/

@@ -9266,11 +9266,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Fidge\\Documents\\bergenapp\\backend\\BergenCollectionApi\\BergenCollectionApi.csproj",
+      "projectUniqueName": "C:\\Users\\Fidge\\Documents\\bergenapp\\backend\\bergencollectionapi\\BergenCollectionApi.csproj",
       "projectName": "BergenCollectionApi",
-      "projectPath": "C:\\Users\\Fidge\\Documents\\bergenapp\\backend\\BergenCollectionApi\\BergenCollectionApi.csproj",
+      "projectPath": "C:\\Users\\Fidge\\Documents\\bergenapp\\backend\\bergencollectionapi\\BergenCollectionApi.csproj",
       "packagesPath": "C:\\Users\\Fidge\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Fidge\\Documents\\bergenapp\\backend\\BergenCollectionApi\\obj\\",
+      "outputPath": "C:\\Users\\Fidge\\Documents\\bergenapp\\backend\\bergencollectionapi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Fidge\\AppData\\Roaming\\NuGet\\NuGet.Config"

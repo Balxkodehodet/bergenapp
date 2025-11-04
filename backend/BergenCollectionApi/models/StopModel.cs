@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 public class Stop
 {
-    public string StopId { get; set; }
-    public string StopName { get; set; }
+    public string StopId { get; set; } = string.Empty;
+    public string StopName { get; set; } = string.Empty;
     public double StopLat { get; set; }
     public double StopLon { get; set; }
-    public string StopDesc { get; set; }
-    public string LocationType { get; set; }
-    public string ParentStation { get; set; }
-    public string WheelchairBoarding { get; set; }
-    public string VehicleType { get; set; }
-    public string PlatformCode { get; set; }
+    public string? StopDesc { get; set; }
+    public string? LocationType { get; set; }
+    public string? ParentStation { get; set; }
+    public string? WheelchairBoarding { get; set; }
+    public string? VehicleType { get; set; }
+    public string? PlatformCode { get; set; }
 }
 
 public static class StopParser
@@ -32,8 +32,8 @@ public static class StopParser
 
             stops.Add(new Stop
             {
-                StopId = fields[0],
-                StopName = fields[1],
+                StopId = fields[0] ?? string.Empty,
+                StopName = fields[1] ?? string.Empty,
                 StopLat = double.TryParse(fields[2], NumberStyles.Any, CultureInfo.InvariantCulture, out var lat) ? lat : 0,
                 StopLon = double.TryParse(fields[3], NumberStyles.Any, CultureInfo.InvariantCulture, out var lon) ? lon : 0,
                 StopDesc = fields.Length > 4 ? fields[4] : null,

@@ -6,7 +6,7 @@ export default function GetBusData() {
   console.log("Bus data from context:", busData);
   useEffect(() => {
     async function fetchBusData() {
-      const res = await fetch("http://localhost:5049/api/buss-data");
+      const res = await fetch("http://localhost:5173/api/buss-data");
       const data = await res.json();
       console.log("Data fetched of bus data", data);
       setBusData(data);

@@ -10,7 +10,7 @@ export default function GetBergenTemp() {
 
   useEffect(() => {
     async function fetchBikeData() {
-      const res = await fetch("http://localhost:5049/api/bike-data");
+      const res = await fetch("http://localhost:5173/api/bike-data");
       const data = await res.json();
       setSykkelData(data); // save full array in context
 

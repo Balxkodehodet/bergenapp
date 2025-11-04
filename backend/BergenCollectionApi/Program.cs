@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173") // Frontend on 5173
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -21,6 +21,7 @@ DotNetEnv.Env.Load();
 
 builder.Services.AddSingleton<BikeDataCache>();
 builder.Services.AddHostedService<BikeDataFetcher>();
+builder.Services.AddHostedService<StopDataImporter>();
 
 builder.Services.AddDbContext<StopsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("StopsDb")));
