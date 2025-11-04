@@ -473,5 +473,60 @@ public class BusController : ControllerBase
       return StatusCode(500, new { error = "Failed to fetch bus departures" });
     }
   }
+
+  [HttpGet("stop-platforms")]
+  public async Task<IActionResult> GetStopPlatforms([FromQuery] string stopName)
+  {
+    if (string.IsNullOrWhiteSpace(stopName))
+    {
+      return BadRequest(new { error = "Please provide a stop name." });
+    }
+
+    try
+    {
+      // First find stops that match the name
+      var matchingStops = _dbContext.Stops
+          .Where(s => s.StopName.Contains(stopName))
+          .ToList();
+
+      if (!matchingStops.Any())
+      {
+        return NotFound(new { error = $"No stops found matching '{stopName}'" });
+      }
+
+      // Group stops by their main station or treat each as individual if no parent
+      var platformGroups = matchingStops
+          .GroupBy(s => string.IsNullOrEmpty(s.ParentStation) ? s.StopId : s.ParentStation)
+          .Select(group => new
+          {
+            mainStopId = group.Key,
+            mainStopName = group.First(s => string.IsNullOrEmpty(s.ParentStation) || s.StopId == group.Key).StopName,
+            hasMultiplePlatforms = group.Count() > 1,
+            platformCount = group.Count(),
+            platforms = group.Select(s => new
+            {
+              s.StopId,
+              s.StopName,
+              s.PlatformCode,
+              s.ParentStation,
+              isMainStop = string.IsNullOrEmpty(s.ParentStation)
+            }).OrderBy(s => s.PlatformCode).ToList()
+          })
+          .ToList();
+
+      return Ok(new
+      {
+        searchTerm = stopName,
+        totalStopsFound = matchingStops.Count,
+        stopGroups = platformGroups,
+        stopsWithPlatforms = platformGroups.Count(g => g.hasMultiplePlatforms)
+      });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error fetching platforms for stop name '{StopName}'", stopName);
+      return StatusCode(500, new { error = "Failed to fetch platforms" });
+    }
+  }
 }
 

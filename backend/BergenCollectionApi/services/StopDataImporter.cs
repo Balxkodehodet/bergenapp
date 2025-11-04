@@ -101,7 +101,7 @@ public class StopDataImporter : BackgroundService
 
         // Create HttpClient with extended timeout
         using var client = new HttpClient();
-        client.Timeout = TimeSpan.FromMinutes(2); // 2 minutes timeout
+        client.Timeout = TimeSpan.FromMinutes(10); // 10 minutes timeout
         client.DefaultRequestHeaders.Add("User-Agent", "Bergen-App/1.0");
 
         try
@@ -123,7 +123,7 @@ public class StopDataImporter : BackgroundService
         }
         catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
         {
-            _logger.LogError("Download timed out after 2 minutes");
+            _logger.LogError("Download timed out after 10 minutes");
             throw;
         }
         catch (HttpRequestException ex)
