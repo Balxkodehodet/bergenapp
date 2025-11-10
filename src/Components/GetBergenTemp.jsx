@@ -7,7 +7,7 @@ export default function GetBergenTemp() {
   console.log("Weather data from context:", weatherData);
   useEffect(() => {
     async function fetchTemp() {
-      const res = await fetch("http://localhost:5173/api/bergen-temp");
+      const res = await fetch("http://localhost:5049/api/bergen-temp");
       const data = await res.json();
       console.log(
         "Bergen temperature data:",

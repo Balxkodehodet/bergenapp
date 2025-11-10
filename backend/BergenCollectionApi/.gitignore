@@ -44,21 +44,12 @@ obj/
 # Visual Studio 2017 auto generated files
 Generated\ Files/
 
-<<<<<<< HEAD
-=======
 # Ignore all files in database/zipCache but keep the folder
 database/zipCache/*
 database/zipCache/*.txt
 database/zipCache/*.zip
 !database/zipCache/.gitkeep
 
-<<<<<<< HEAD
->>>>>>> origin/jaurund-backend
-=======
-# Ignore all zip files in database folder
-database/*.zip
-
->>>>>>> origin/jaurund-backend
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
@@ -498,7 +489,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/jaurund-backend
