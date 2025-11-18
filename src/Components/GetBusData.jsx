@@ -2,61 +2,97 @@ import { useState, useEffect } from "react";
 import "../App.css";
 
 export default function GetBusData() {
-  const [busData, setBusData] = useState("");
-  const [stopName, setStopName] = useState("");
-  const [bus, setBus] = useState("arna");
-  console.log("Bus data from context:", busData);
+  const [busData, setBusData] = useState(null);
+  const [bus, setBus] = useState("Bergen busstasjon");
+
   useEffect(() => {
     async function fetchBusData() {
-      const res = await fetch(`http://localhost:3001/api/buss-data`);
-      const data = await res.json();
-      console.log("Data fetched of bus data", data);
-      setBusData(data);
+      if (!bus || bus.trim() === "") {
+        // don't fetch for empty search; clear results
+        setBusData(null);
+        return;
+      }
+
+      try {
+        const url = `http://localhost:5049/api/bus-departures-by-name?stopName=${encodeURIComponent(
+          bus
+        )}`; // port 3001 for javascript backend og buss-data som endpoint
+        const res = await fetch(url);
+        if (!res.ok) {
+          console.error("Fetch failed:", res.status, res.statusText);
+          setBusData(null);
+          return;
+        }
+        const data = await res.json();
+        console.log("Data fetched of bus data", data);
+        setBusData(data);
+      } catch (err) {
+        console.error("Error fetching bus data:", err);
+        setBusData(null);
+      }
     }
+
     fetchBusData();
-  }, []);
-  let busdepartures = [];
-  let busdepartures2;
-  if (busData) {
-    busdepartures = busData.data.stopPlace.estimatedCalls;
-    busdepartures2 = busdepartures.filter(
-      (bus) => bus.serviceJourney.line.transportMode === "BUS".toLowerCase()
-    );
+  }, [bus]);
+
+  let busdepartures2 = [];
+  if (busData && busData.data && Array.isArray(busData.data.estimatedCalls)) {
+    const busdepartures = busData.data.estimatedCalls;
+    busdepartures2 = busdepartures.filter((b) => {
+      return (
+        (b.serviceJourney?.line?.transportMode || "").toLowerCase() === "bus"
+      );
+    });
   }
 
-  console.log("bus departures: ", busdepartures2);
-  console.log(busData);
-  console.log("BUS:", bus);
   return (
     <>
-      {!busData ? (
-        <p>Laster data...</p>
+      <form
+        className="search-bus"
+        onSubmit={(e) => {
+          e.preventDefault();
+          // submit doesn't need to change state here; bus is already bound to input
+          setBus(bus);
+        }}
+      >
+        <label>
+          <strong>Søk etter buss stasjon i vestland her:</strong>
+          <input
+            type="search"
+            value={bus}
+            onChange={(e) => setBus(e.target.value)}
+          />
+        </label>
+      </form>
+
+      {!bus || bus.trim() === "" ? (
+        <p className="søkeData">Skriv inn et stoppnavn for å søke.</p>
+      ) : busData === null ? (
+        <p className="søkeData">Laster data...</p>
+      ) : busdepartures2.length === 0 ? (
+        <p className="søkeData">Ingen avganger funnet for «{bus}».</p>
       ) : (
-        <>
-          <div className="bus-data">
-            <h2>Neste 15 busser avgang fra Bergen buss stasjon: </h2>
-            {busdepartures2.map((bus, index) => (
-              <div key={index}>
-                <p>
-                  Buss til: <b>{bus.destinationDisplay.frontText}</b>
-                  <br></br>
-                  Forventet avgangstid:{" "}
-                  <b>
-                    {bus.expectedDepartureTime
-                      .replace("T", " Kl:")
-                      .replace("+01:00", " ")}
-                  </b>
-                  <br></br>
-                  Linje:
-                  <b>
-                    {bus.serviceJourney.line.id.replace("SKY:Line:", "") + " "}
-                  </b>
-                </p>
-                <hr></hr>
-              </div>
-            ))}
-          </div>
-        </>
+        <div className="bus-data">
+          <h2>Neste 15 busser avgang fra {bus}:</h2>
+          {busdepartures2.map((b, index) => (
+            <div key={index}>
+              <p>
+                Buss til: <b>{b.destinationDisplay?.frontText}</b>
+                <br />
+                Forventet avgangstid:{" "}
+                <b>
+                  {b.expectedDepartureTime
+                    ?.replace("T", " Kl:")
+                    .replace("+01:00", " ")}
+                </b>
+                <br />
+                Linje:{" "}
+                <b>{b.serviceJourney?.line?.id?.replace("SKY:Line:", "")}</b>
+              </p>
+              <hr />
+            </div>
+          ))}
+        </div>
       )}
     </>
   );
