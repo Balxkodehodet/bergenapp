@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+namespace BergenCollectionApi.models;
+
 public class DepartureWithContext
 {
     public string StopId { get; set; } = string.Empty;

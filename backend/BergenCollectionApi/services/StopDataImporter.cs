@@ -1,5 +1,7 @@
 using System.IO.Compression;
 using System.Globalization;
+using BergenCollectionApi.data;
+using BergenCollectionApi.models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

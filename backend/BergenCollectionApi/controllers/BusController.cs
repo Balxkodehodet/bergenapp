@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text;
+using BergenCollectionApi.data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BergenCollectionApi.Controllers;
 
@@ -19,6 +21,42 @@ public class BusController : ControllerBase
     _dbContext = dbContext; // Add this
   }
 
+  /// <summary>
+  /// Resolve an identifier that might be a Quay (platform) to its owning StopPlace (station),
+  /// because Entur's GraphQL field stopPlace expects a StopPlace id, not a Quay id.
+  /// If the id already points to a StopPlace or no mapping is found, returns the original id.
+  /// </summary>
+  private string ResolveStopPlaceId(string stopId)
+  {
+    if (string.IsNullOrWhiteSpace(stopId)) return stopId;
+
+    // If already a StopPlace id, use as-is
+    if (stopId.StartsWith("NSR:StopPlace:", StringComparison.OrdinalIgnoreCase))
+    {
+      return stopId;
+    }
+
+    try
+    {
+      // Try to map Quay -> ParentStation (StopPlace) using local DB
+      var stop = _dbContext.Stops
+        .AsNoTracking()
+        .FirstOrDefault(s => s.StopId == stopId);
+
+      if (stop != null && !string.IsNullOrWhiteSpace(stop.ParentStation))
+      {
+        return stop.ParentStation!;
+      }
+    }
+    catch (Exception ex)
+    {
+      _logger.LogWarning(ex, "Failed to resolve StopPlace id for {StopId}", stopId);
+    }
+
+    // Fallback: return original id
+    return stopId;
+  }
+
   [HttpGet("bus-departures")]
   public async Task<IActionResult> GetBusDepartures(
       [FromQuery] string stopId,
@@ -32,28 +70,29 @@ public class BusController : ControllerBase
 
     try
     {
-      var query = $@"
-            {{
-              stopPlace(id: ""{stopId}"") {{
-                name
-                id
-                estimatedCalls(timeRange: {timeRange}, numberOfDepartures: {numberOfDepartures}) {{
-                  realtime
-                  aimedDepartureTime
-                  expectedDepartureTime
-                  destinationDisplay {{
-                    frontText
-                  }}
-                  serviceJourney {{
-                    line {{
-                      id
-                      name
-                      transportMode
-                    }}
-                  }}
-                }}
-              }}
-            }}";
+      var resolvedStopId = ResolveStopPlaceId(stopId);
+      var query =
+        "{" +
+        "  stopPlace(id: \"" + resolvedStopId + "\") {" +
+        "    name" +
+        "    id" +
+        "    estimatedCalls(timeRange: " + timeRange + ", numberOfDepartures: " + numberOfDepartures + ") {" +
+        "      realtime" +
+        "      aimedDepartureTime" +
+        "      expectedDepartureTime" +
+        "      destinationDisplay {" +
+        "        frontText" +
+        "      }" +
+        "      serviceJourney {" +
+        "        line {" +
+        "          id" +
+        "          name" +
+        "          transportMode" +
+        "        }" +
+        "      }" +
+        "    }" +
+        "  }" +
+        "}";
 
       var requestBody = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json");
 
@@ -80,12 +119,13 @@ public class BusController : ControllerBase
           !dataElement.TryGetProperty("stopPlace", out var stopPlaceElement) ||
           stopPlaceElement.ValueKind == JsonValueKind.Null)
       {
-        return NotFound(new { error = $"Stop {stopId} not found or inactive" });
+        return NotFound(new { error = $"Stop {resolvedStopId} not found or inactive" });
       }
 
       return Ok(new
       {
-        stopId = stopId,
+        requestedStopId = stopId,
+        resolvedStopId = resolvedStopId,
         data = stopPlaceElement,
         requestedAt = DateTime.UtcNow
       });
@@ -119,28 +159,29 @@ public class BusController : ControllerBase
     {
       try
       {
-        var query = $@"
-                {{
-                  stopPlace(id: ""{stopId}"") {{
-                    name
-                    id
-                    estimatedCalls(timeRange: {timeRange}, numberOfDepartures: {numberOfDepartures}) {{
-                      realtime
-                      aimedDepartureTime
-                      expectedDepartureTime
-                      destinationDisplay {{
-                        frontText
-                      }}
-                      serviceJourney {{
-                        line {{
-                          id
-                          name
-                          transportMode
-                        }}
-                      }}
-                    }}
-                  }}
-                }}";
+        var resolvedStopId = ResolveStopPlaceId(stopId);
+        var query =
+          "{" +
+          "  stopPlace(id: \"" + resolvedStopId + "\") {" +
+          "    name" +
+          "    id" +
+          "    estimatedCalls(timeRange: " + timeRange + ", numberOfDepartures: " + numberOfDepartures + ") {" +
+          "      realtime" +
+          "      aimedDepartureTime" +
+          "      expectedDepartureTime" +
+          "      destinationDisplay {" +
+          "        frontText" +
+          "      }" +
+          "      serviceJourney {" +
+          "        line {" +
+          "          id" +
+          "          name" +
+          "          transportMode" +
+          "        }" +
+          "      }" +
+          "    }" +
+          "  }" +
+          "}";
 
         var requestBody = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json");
 
@@ -162,7 +203,8 @@ public class BusController : ControllerBase
         {
           results.Add(new
           {
-            stopId = stopId,
+            requestedStopId = stopId,
+            resolvedStopId = resolvedStopId,
             success = true,
             data = stopPlaceElement
           });
@@ -171,7 +213,8 @@ public class BusController : ControllerBase
         {
           results.Add(new
           {
-            stopId = stopId,
+            requestedStopId = stopId,
+            resolvedStopId = resolvedStopId,
             success = false,
             error = "Stop not found or inactive"
           });
@@ -182,7 +225,7 @@ public class BusController : ControllerBase
         _logger.LogWarning(ex, "Error fetching data for stop {StopId}", stopId);
         results.Add(new
         {
-          stopId = stopId,
+          requestedStopId = stopId,
           success = false,
           error = ex.Message
         });
@@ -214,7 +257,8 @@ public class BusController : ControllerBase
       // First, find the stop by name using your StopsDbContext
       var matchingStops = _dbContext.Stops
           .Where(s => s.StopName.Contains(stopName))
-          .Select(s => new { s.StopId, s.StopName })
+          .Select(s => new { s.StopId, s.StopName, s.ParentStation })
+          .AsNoTracking()
           .ToList();
 
       if (!matchingStops.Any())
@@ -222,32 +266,37 @@ public class BusController : ControllerBase
         return NotFound(new { error = $"No stops found matching '{stopName}'" });
       }
 
-      // Use the first matching stop for now
-      var selectedStop = matchingStops.First();
+      // Prefer a station-level row (no ParentStation). If not available, fall back to first and use its ParentStation.
+      var stationLevel = matchingStops.FirstOrDefault(s => string.IsNullOrWhiteSpace(s.ParentStation));
+      var selectedStop = stationLevel ?? matchingStops.First();
+      var resolvedStopId = !string.IsNullOrWhiteSpace(selectedStop.ParentStation)
+        ? selectedStop.ParentStation!
+        : selectedStop.StopId;
+      resolvedStopId = ResolveStopPlaceId(resolvedStopId);
 
       // Now get bus departure data using the existing logic
-      var query = $@"
-          {{
-            stopPlace(id: ""{selectedStop.StopId}"") {{
-              name
-              id
-              estimatedCalls(timeRange: {timeRange}, numberOfDepartures: {numberOfDepartures}) {{
-                realtime
-                aimedDepartureTime
-                expectedDepartureTime
-                destinationDisplay {{
-                  frontText
-                }}
-                serviceJourney {{
-                  line {{
-                    id
-                    name
-                    transportMode
-                  }}
-                }}
-              }}
-            }}
-          }}";
+      var query =
+        "{" +
+        "  stopPlace(id: \"" + resolvedStopId + "\") {" +
+        "    name" +
+        "    id" +
+        "    estimatedCalls(timeRange: " + timeRange + ", numberOfDepartures: " + numberOfDepartures + ") {" +
+        "      realtime" +
+        "      aimedDepartureTime" +
+        "      expectedDepartureTime" +
+        "      destinationDisplay {" +
+        "        frontText" +
+        "      }" +
+        "      serviceJourney {" +
+        "        line {" +
+        "          id" +
+        "          name" +
+        "          transportMode" +
+        "        }" +
+        "      }" +
+        "    }" +
+        "  }" +
+        "}";
 
       var requestBody = new StringContent(JsonSerializer.Serialize(new { query }), Encoding.UTF8, "application/json");
 
@@ -268,13 +317,14 @@ public class BusController : ControllerBase
           !dataElement.TryGetProperty("stopPlace", out var stopPlaceElement) ||
           stopPlaceElement.ValueKind == JsonValueKind.Null)
       {
-        return NotFound(new { error = $"Stop {selectedStop.StopId} not found or inactive" });
+        return NotFound(new { error = $"Stop {resolvedStopId} not found or inactive" });
       }
 
       return Ok(new
       {
-        stopId = selectedStop.StopId,
-        stopName = selectedStop.StopName,
+        requestedStopName = stopName,
+        selectedStop = new { selectedStop.StopId, selectedStop.StopName, selectedStop.ParentStation },
+        resolvedStopId = resolvedStopId,
         data = stopPlaceElement,
         requestedAt = DateTime.UtcNow
       });

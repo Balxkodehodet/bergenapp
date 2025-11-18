@@ -1,4 +1,7 @@
+using BergenCollectionApi.models;
 using Microsoft.EntityFrameworkCore;
+
+namespace BergenCollectionApi.data;
 
 public class StopsDbContext : DbContext
 {
