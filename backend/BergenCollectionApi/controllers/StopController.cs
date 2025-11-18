@@ -1,4 +1,7 @@
+using BergenCollectionApi.data;
 using Microsoft.AspNetCore.Mvc;
+
+namespace BergenCollectionApi.controllers;
 
 [ApiController]
 [Route("api")]
