@@ -54,6 +54,7 @@ Runs on `http://localhost:5173`
    ```
    
    API runs on `http://localhost:5049`
+   Add /swagger slug to use Swagger UI during development and for testing.
 
 ### What Happens on First Run
 - Database and tables are created automatically

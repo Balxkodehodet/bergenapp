@@ -48,6 +48,27 @@
   padding: 10px;
   border-radius: 5px;
 }
+.bus-formdata {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+.search-bus {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
+.søkeData {
+  margin-top: 10px;
+  background-color: #e0f7fa;
+  border: 2px solid #110c01;
+  padding: 10px;
+  border-radius: 5px;
+}
 .bus-data {
   margin-top: 10px;
   background-color: #e0f7fa;
