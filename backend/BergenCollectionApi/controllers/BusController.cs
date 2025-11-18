@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text;
+using BergenCollectionApi.data;
 
 namespace BergenCollectionApi.Controllers;
 

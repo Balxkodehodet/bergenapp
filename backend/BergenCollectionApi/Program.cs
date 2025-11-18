@@ -1,3 +1,4 @@
+using BergenCollectionApi.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 
