@@ -1,4 +1,7 @@
+using BergenCollectionApi.data;
 using Microsoft.AspNetCore.Mvc;
+
+namespace BergenCollectionApi.controllers;
 
 [ApiController]
 [Route("api")]
@@ -55,14 +58,10 @@ public class StopController : ControllerBase
         try
         {
             var stops = _context.Stops
-                .Select(s => new
-                {
-                    s.StopId,
-                    s.StopName,
-                    s.ParentStation
-                })
+                .Select(s => new { s.StopId, s.StopName })
                 .OrderBy(s => s.StopName)
-                .ToList(); // REMOVED .Take(1000) limit
+                .Take(1000) // Limit to prevent huge responses
+                .ToList();
 
             return Ok(new
             {

@@ -1,6 +1,0 @@
-@BergenCollectionApi_HostAddress = http://localhost:5049
-
-GET {{BergenCollectionApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

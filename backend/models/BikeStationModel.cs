@@ -1,3 +1,5 @@
+namespace BergenCollectionApi.models;
+
 public class BikeStationQuery
 {
     public int? MinBikes { get; set; }
