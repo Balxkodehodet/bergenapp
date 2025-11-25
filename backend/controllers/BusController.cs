@@ -256,7 +256,7 @@ public class BusController : ControllerBase
     {
       // First, find the stop by name using your StopsDbContext
       var matchingStops = _dbContext.Stops
-          .Where(s => s.StopName.Contains(stopName))
+          .Where(s => EF.Functions.ILike(s.StopName, "%" + stopName + "%"))
           .Select(s => new { s.StopId, s.StopName, s.ParentStation })
           .AsNoTracking()
           .ToList();

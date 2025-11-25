@@ -1,5 +1,6 @@
 using BergenCollectionApi.data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BergenCollectionApi.controllers;
 
@@ -27,7 +28,7 @@ public class StopController : ControllerBase
         try
         {
             var stops = _context.Stops
-                .Where(s => s.StopName.Contains(query))
+                .Where(s => EF.Functions.ILike(s.StopName, "%" + query + "%"))
                 .Select(s => new
                 {
                     s.StopId,
@@ -88,7 +89,7 @@ public class StopController : ControllerBase
         {
             // Find all stops matching the name
             var matchingStops = _context.Stops
-                .Where(s => s.StopName.Contains(stopName))
+                .Where(s => EF.Functions.ILike(s.StopName, "%" + stopName + "%"))
                 .ToList();
 
             if (!matchingStops.Any())
