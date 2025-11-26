@@ -28,7 +28,7 @@ services:
         sync: false
       # Optional: writable tmp dir for importer / files
       - key: DATA_DIR
-        value: /opt/render/project/tmp/bergenapp
+        value: /tmp/bergenapp
       # Optional: CORS origin for production (if you add support in Program.cs)
       - key: FRONTEND_ORIGIN
         # Set to your deployed frontend URL; update after first deploy if needed
