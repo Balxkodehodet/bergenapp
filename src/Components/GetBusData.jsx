@@ -14,9 +14,10 @@ export default function GetBusData() {
       }
 
       try {
-        const url = `http://localhost:5049/api/bus-departures-by-name?stopName=${encodeURIComponent(
+        const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:5049";
+        const url = `${apiBase}/api/bus-departures-by-name?stopName=${encodeURIComponent(
           bus
-        )}`; // port 3001 for javascript backend og buss-data som endpoint
+        )}`;
         const res = await fetch(url);
         if (!res.ok) {
           console.error("Fetch failed:", res.status, res.statusText);

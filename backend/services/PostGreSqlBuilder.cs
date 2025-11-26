@@ -30,7 +30,8 @@ public static class PostgreSqlBuilder
                     var sslInUrl = databaseUrl.IndexOf("sslmode=require", StringComparison.OrdinalIgnoreCase) >= 0;
 
                     var cs = $"Host={h};Port={prt};Database={db};Username={u};Password={p};";
-                    if (sslInUrl)
+                    // Render PostgreSQL requires SSL, so enable it by default for DATABASE_URL
+                    if (sslInUrl || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RENDER")))
                         cs += "SSL Mode=Require;Trust Server Certificate=true;";
 
                     Console.WriteLine($"[DB] Using DATABASE_URL → Host={h}; Port={prt}; Database={db}; Username={u}");

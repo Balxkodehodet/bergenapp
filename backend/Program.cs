@@ -14,12 +14,24 @@ builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CORS: allow local dev and optionally a production origin provided via env FRONTEND_ORIGIN
+var frontendOrigin = Environment.GetEnvironmentVariable("FRONTEND_ORIGIN");
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins("http://localhost:5173") // Frontend on 5173
+    {
+        var allowedOrigins = new List<string> { "http://localhost:5173" };
+        if (!string.IsNullOrWhiteSpace(frontendOrigin))
+        {
+            // Support comma-separated list of origins
+            allowedOrigins.AddRange(frontendOrigin
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        }
+
+        policy.WithOrigins(allowedOrigins.ToArray())
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod();
+    });
 });
 
 // Bind to Render-provided port if present
