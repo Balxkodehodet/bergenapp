@@ -1,0 +1,67 @@
+services:
+  # ======================================
+  # Backend API (Dockerized ASP.NET Core)
+  # ======================================
+  - type: web
+    name: bergen-api
+    env: docker
+    rootDir: backend
+    plan: free
+    autoDeploy: true
+    # Render will auto-detect backend/Dockerfile; you can specify explicitly:
+    dockerfilePath: Dockerfile
+
+    # Health check path (Swagger is disabled in Production by default)
+    healthCheckPath: /api/stops/all
+
+    # Environment variables
+    envVars:
+      # Pull DATABASE_URL from the managed Postgres defined below
+      - key: DATABASE_URL
+        fromDatabase: bergen-db
+      # Your existing code reads this for external API headers
+      - key: USER_AGENT_EMAIL
+        # Do NOT hard-code secrets in IaC. Set this in Render Dashboard → Environment → Add Environment Variable
+        # Locally, this is loaded from backend/secrets/.env
+        sync: false
+      # Optional: writable tmp dir for importer / files
+      - key: DATA_DIR
+        value: /opt/render/project/tmp/bergenapp
+      # Optional: CORS origin for production (if you add support in Program.cs)
+      - key: FRONTEND_ORIGIN
+        # Set to your deployed frontend URL; update after first deploy if needed
+        value: https://bergen-frontend.onrender.com
+
+  # ======================================
+  # Frontend (choose ONE of the two below)
+  # ======================================
+
+  # Option A: Render Static Site (recommended for Vite)
+  - type: static
+    name: bergen-frontend
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    publishPath: dist
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_BASE
+        # Point the frontend to the backend API URL
+        value: https://bergen-api.onrender.com
+
+  # Option B: Dockerized frontend with Nginx (comment out Option A if using this)
+  # - type: web
+  #   name: bergen-frontend-docker
+  #   env: docker
+  #   rootDir: .
+  #   dockerfilePath: Dockerfile.frontend
+  #   plan: free
+  #   envVars:
+  #     - key: VITE_API_BASE
+  #       sync: false
+  #   healthCheckPath: /
+
+# Managed PostgreSQL database
+# Render will generate DATABASE_URL for you; we reference it from the backend via fromDatabase above.
+databases:
+  - name: bergen-db
+    plan: free

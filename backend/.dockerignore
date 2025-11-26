@@ -1,0 +1,25 @@
+# Dotnet artifacts
+bin/
+obj/
+
+# Rider/IDE files
+.idea/
+.vs/
+*.user
+
+# Secrets and local env files
+secrets/
+*.env
+
+# Node artifacts (shouldn't be in backend but exclude just in case)
+node_modules/
+package.json
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+**/*.swp
+**/*.tmp

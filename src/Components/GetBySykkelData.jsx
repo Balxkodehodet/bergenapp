@@ -10,7 +10,8 @@ export default function GetBergenTemp() {
 
   useEffect(() => {
     async function fetchBikeData() {
-      const res = await fetch("http://localhost:5049/api/bike-data");
+      const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:5049";
+      const res = await fetch(`${apiBase}/api/bike-data`);
       const data = await res.json();
       setSykkelData(data); // save full array in context
 
