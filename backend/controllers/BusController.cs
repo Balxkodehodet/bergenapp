@@ -189,7 +189,7 @@ public class BusController : ControllerBase
         {
           Content = requestBody
         };
-        request.Headers.Add("ET-Client-Name", "student/Bergen-app");
+        request.Headers.Add("ET-Client-Name", "balx042025@gmail.com"); //"student/Bergen-app"); 
 
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
