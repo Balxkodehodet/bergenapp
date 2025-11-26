@@ -42,7 +42,6 @@ services:
     env: static
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
-    plan: free
     autoDeploy: true
     envVars:
       - key: VITE_API_BASE
