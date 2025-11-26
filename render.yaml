@@ -33,32 +33,19 @@ services:
         value: https://bergen-frontend.onrender.com
 
   # ======================================
-  # Frontend (choose ONE of the two below)
+  # Frontend (Static Site)
   # ======================================
-
-  # Option A: Render Static Site (recommended for Vite)
-  - type: static
+  - type: web
     name: bergen-frontend
-    rootDir: .
+    env: static
     buildCommand: npm ci && npm run build
-    publishPath: dist
+    staticPublishPath: dist
+    plan: free
     autoDeploy: true
     envVars:
       - key: VITE_API_BASE
         # Point the frontend to the backend API URL
         value: https://bergen-api.onrender.com
-
-  # Option B: Dockerized frontend with Nginx (comment out Option A if using this)
-  # - type: web
-  #   name: bergen-frontend-docker
-  #   env: docker
-  #   rootDir: .
-  #   dockerfilePath: Dockerfile.frontend
-  #   plan: free
-  #   envVars:
-  #     - key: VITE_API_BASE
-  #       sync: false
-  #   healthCheckPath: /
 
 # Managed PostgreSQL database
 # Render will generate DATABASE_URL for you; we reference it from the backend via fromDatabase above.
