@@ -18,7 +18,9 @@ services:
     envVars:
       # Pull DATABASE_URL from the managed Postgres defined below
       - key: DATABASE_URL
-        fromDatabase: bergen-db
+        fromDatabase:
+          name: bergen-db
+          property: connectionString
       # Your existing code reads this for external API headers
       - key: USER_AGENT_EMAIL
         # Do NOT hard-code secrets in IaC. Set this in Render Dashboard → Environment → Add Environment Variable
