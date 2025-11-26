@@ -1,9 +1,12 @@
 using System.IO.Compression;
 using System.Globalization;
+using BergenCollectionApi.data;
+using BergenCollectionApi.models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 
 public class StopDataImporter : BackgroundService
@@ -11,14 +14,25 @@ public class StopDataImporter : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<StopDataImporter> _logger;
     private readonly string _gtfsZipUrl = "https://storage.googleapis.com/marduk-production/outbound/gtfs/rb_sky-aggregated-gtfs.zip";
-    private readonly string _zipPath = "database/gtfs.zip";
-    private readonly string _extractPath = "database/zipCache/stops.txt";
+    private readonly string _baseDataPath;
+    private readonly string _zipPath;
+    private readonly string _extractPath;
 
 
     public StopDataImporter(IServiceProvider serviceProvider, ILogger<StopDataImporter> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+
+        // Use an ephemeral, writable path (works locally and on platforms like Render)
+        var root = Environment.GetEnvironmentVariable("DATA_DIR");
+        if (string.IsNullOrWhiteSpace(root))
+        {
+            root = Path.Combine(Path.GetTempPath(), "bergenapp");
+        }
+        _baseDataPath = root;
+        _zipPath = Path.Combine(_baseDataPath, "gtfs.zip");
+        _extractPath = Path.Combine(_baseDataPath, "zipCache", "stops.txt");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,6 +42,10 @@ public class StopDataImporter : BackgroundService
 
         try
         {
+            // Ensure the database itself exists (create DB if missing), then wait for readiness
+            await EnsureDatabaseExistsAsync(dbContext, stoppingToken);
+            await WaitForDatabaseAsync(dbContext, stoppingToken);
+
             // Ensure database and tables exist
             await dbContext.Database.EnsureCreatedAsync();
             _logger.LogInformation("Database ensured to exist");
@@ -47,7 +65,7 @@ public class StopDataImporter : BackgroundService
             if (!string.IsNullOrEmpty(zipDir))
             {
                 Directory.CreateDirectory(zipDir);
-                _logger.LogInformation("Created directory: {Directory}", zipDir);
+                _logger.LogInformation("Using data directory: {Directory}", zipDir);
             }
 
             await DownloadGtfsZipAsync();
@@ -92,6 +110,121 @@ public class StopDataImporter : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to update GTFS stops.txt");
+        }
+    }
+
+    private async Task EnsureDatabaseExistsAsync(StopsDbContext db, CancellationToken ct)
+    {
+        // Build a maintenance connection (to 'postgres') so we can create the target database if missing
+        var targetCs = db.Database.GetConnectionString();
+        if (string.IsNullOrWhiteSpace(targetCs))
+        {
+            _logger.LogWarning("No connection string available to ensure database exists.");
+            return;
+        }
+
+        var target = new NpgsqlConnectionStringBuilder(targetCs);
+        var targetDbName = target.Database;
+
+        // If database name is empty, nothing we can do
+        if (string.IsNullOrWhiteSpace(targetDbName))
+        {
+            _logger.LogWarning("No Database specified in connection string; skipping EnsureDatabaseExists.");
+            return;
+        }
+
+        // First: try to connect to the target database; if it exists and is accessible, we're done.
+        try
+        {
+            await using (var probe = new NpgsqlConnection(targetCs))
+            {
+                await probe.OpenAsync(ct);
+                _logger.LogInformation("Database '{DbName}' is accessible.", targetDbName);
+                return;
+            }
+        }
+        catch (PostgresException ex) when (ex.SqlState == "3D000")
+        {
+            // Database does not exist → attempt to create it using maintenance DB
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not connect to database '{DbName}' to probe existence; proceeding to creation attempt if permitted.", targetDbName);
+        }
+
+        var adminBuilder = new NpgsqlConnectionStringBuilder(targetCs)
+        {
+            Database = "postgres"
+        };
+
+        try
+        {
+            await using var adminConn = new NpgsqlConnection(adminBuilder.ConnectionString);
+            await adminConn.OpenAsync(ct);
+
+            await using (var existsCmd = new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = @name)", adminConn))
+            {
+                existsCmd.Parameters.AddWithValue("name", targetDbName);
+                var exists = (bool)(await existsCmd.ExecuteScalarAsync(ct) ?? false);
+                if (exists)
+                {
+                    _logger.LogInformation("Database '{DbName}' already exists.", targetDbName);
+                    return;
+                }
+            }
+
+            _logger.LogInformation("Database '{DbName}' not found. Creating...", targetDbName);
+            // Quote identifier to be safe
+            var quotedName = '"' + targetDbName.Replace("\"", "\"\"") + '"';
+            await using (var createCmd = new NpgsqlCommand($"CREATE DATABASE {quotedName}", adminConn))
+            {
+                await createCmd.ExecuteNonQueryAsync(ct);
+            }
+            _logger.LogInformation("Database '{DbName}' created successfully.", targetDbName);
+        }
+        catch (PostgresException pex)
+        {
+            if (pex.SqlState == "42P04") // duplicate_database
+            {
+                _logger.LogWarning("Database '{DbName}' was created concurrently.", targetDbName);
+                return;
+            }
+            // Some providers disallow connecting to 'postgres' or creating databases; log and continue
+            _logger.LogWarning(pex, "Unable to create database '{DbName}'. It may require manual creation or provider permissions.", targetDbName);
+        }
+    }
+
+    private async Task WaitForDatabaseAsync(StopsDbContext db, CancellationToken ct)
+    {
+        var attempt = 0;
+        var maxAttempts = 10;
+        var delay = TimeSpan.FromSeconds(1);
+
+        while (!ct.IsCancellationRequested && attempt < maxAttempts)
+        {
+            try
+            {
+                if (await db.Database.CanConnectAsync(ct))
+                {
+                    _logger.LogInformation("Database connection established.");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Database not ready yet (attempt {Attempt}/{MaxAttempts}). Retrying in {Delay}s...", attempt + 1, maxAttempts, delay.TotalSeconds);
+            }
+
+            attempt++;
+            await Task.Delay(delay, ct);
+            // Exponential backoff up to ~30s
+            delay = TimeSpan.FromSeconds(Math.Min(delay.TotalSeconds * 2, 30));
+        }
+
+        // One last try to throw a more explicit error if still not reachable
+        if (!await db.Database.CanConnectAsync(ct))
+        {
+            throw new InvalidOperationException("Could not connect to the PostgreSQL database after multiple attempts. Ensure the server is running and reachable.");
         }
     }
 

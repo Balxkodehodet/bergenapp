@@ -1,3 +1,5 @@
+namespace BergenCollectionApi.models;
+
 public class BusQuery
 {
     public string? stopPlaceId { get; set; }

@@ -1,4 +1,9 @@
+using System;
+using System.IO;
+using BergenCollectionApi.data;
+using BergenCollectionApi.services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,15 +22,26 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-DotNetEnv.Env.Load();
+// Bind to Render-provided port if present
+var renderPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(renderPort))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{renderPort}");
+}
+
+// Load environment variables from .env files via centralized helper
+EnvSecretsLoader.Load(builder);
 
 builder.Services.AddSingleton<BikeDataCache>();
 builder.Services.AddHostedService<BikeDataFetcher>();
 builder.Services.AddHostedService<StopDataImporter>();
 
+// Build PostgreSQL connection string via helper
+var connectionString = PostgreSqlBuilder.Build(builder.Configuration);
+
 builder.Services.AddDbContext<StopsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("StopsDb")));
-// Or UseSqlServer for SQL Server
+    options.UseNpgsql(connectionString));
+// Switched to PostgreSQL via Npgsql
 
 var app = builder.Build();
 
@@ -37,7 +53,20 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
-app.UseHttpsRedirection();
+// Respect X-Forwarded-* headers from reverse proxies like Render
+var fwdOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+fwdOptions.KnownNetworks.Clear();
+fwdOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(fwdOptions);
+
+// Avoid HTTPS redirection issues behind a proxy unless explicitly desired
+if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RENDER")))
+{
+    app.UseHttpsRedirection();
+}
 app.MapControllers();
 
 app.Run();
