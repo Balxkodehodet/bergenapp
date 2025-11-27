@@ -27,6 +27,8 @@
 #root {
   width: 100svw;
   height: 100svh;
+  color: #110c01;
+  background-color: #00796b;
 }
 .overskrift {
   order: 0;
