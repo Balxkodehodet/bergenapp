@@ -10,9 +10,12 @@
   bottom: 0;
   width: 100%;
 }
+.loading {
+  background-color: #00796b;
+}
 .dark-theme {
   background-color: #110c01;
-  color: #f1f1f1;
+  color: #110c01;
 }
 .light-theme {
   background-color: #f1f1f1;
@@ -35,8 +38,6 @@
 #root {
   width: 100svw;
   height: 100svh;
-  color: #110c01;
-  background-color: #00796b;
 }
 .overskrift {
   order: 0;

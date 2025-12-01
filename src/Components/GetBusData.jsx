@@ -14,7 +14,8 @@ export default function GetBusData() {
       }
 
       try {
-        const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:5049";
+        const apiBase =
+          import.meta.env.VITE_API_BASE || "http://localhost:5049";
         const url = `${apiBase}/api/bus-departures-by-name?stopName=${encodeURIComponent(
           bus
         )}`;
@@ -69,7 +70,7 @@ export default function GetBusData() {
       {!bus || bus.trim() === "" ? (
         <p className="søkeData">Skriv inn et stoppnavn for å søke.</p>
       ) : busData === null ? (
-        <p className="søkeData">Laster data...</p>
+        <p className="loading">Laster data...</p>
       ) : busdepartures2.length === 0 ? (
         <p className="søkeData">Ingen avganger funnet for «{bus}».</p>
       ) : (

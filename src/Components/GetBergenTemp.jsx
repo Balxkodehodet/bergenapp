@@ -27,7 +27,7 @@ export default function GetBergenTemp() {
       {!weatherData ||
       !weatherData.properties ||
       !weatherData.properties.timeseries ? (
-        <p>Laster data...</p>
+        <p className="loading">Laster data...</p>
       ) : (
         <>
           <div className="weather-data">

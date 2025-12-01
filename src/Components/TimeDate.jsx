@@ -8,7 +8,7 @@ export default function TimeDate() {
       {!weatherData ||
       !weatherData.properties ||
       !weatherData.properties.timeseries ? (
-        <p>Laster data...</p>
+        <p className="loading">Laster data...</p>
       ) : (
         <h2 className="tid-header">
           Værdata vises for tid:<br></br>{" "}

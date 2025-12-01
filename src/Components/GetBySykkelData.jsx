@@ -76,7 +76,7 @@ export default function GetBergenTemp() {
   return (
     <>
       {!randomStation ? (
-        <p>Laster data...</p>
+        <p className="loading">Laster data...</p>
       ) : (
         <>
           <div className="bike-formdata">
