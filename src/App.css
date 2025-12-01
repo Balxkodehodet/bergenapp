@@ -10,6 +10,14 @@
   bottom: 0;
   width: 100%;
 }
+.dark-theme {
+  background-color: #110c01;
+  color: #f1f1f1;
+}
+.light-theme {
+  background-color: #f1f1f1;
+  color: #110c01;
+}
 .weather-data {
   display: flex;
   flex-direction: row;

@@ -6,13 +6,17 @@ import { AppProvider } from "./Components/AppContext";
 import TimeDate from "./Components/TimeDate.jsx";
 import GetBySykkelData from "./Components/GetBySykkelData.jsx";
 import GetBusData from "./Components/GetBusData.jsx";
+import themechanger from "./Components/ThemeChanger.jsx";
 
 function App() {
+  const [theme, setTheme] = themechanger();
   return (
     <AppProvider>
       <>
         <GetBergenTemp />
         <TimeDate />
+        <button onClick={() => setTheme("light")}>Set light Theme</button>
+        <button onClick={() => setTheme("dark")}>Set dark Theme</button>
         <GetBusData />
         <GetBySykkelData />
         <Footer />
