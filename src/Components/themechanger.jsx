@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-export default function themechanger() {
+export default function ThemeChanger() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "dark";
   });
