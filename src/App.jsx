@@ -6,10 +6,10 @@ import { AppProvider } from "./Components/AppContext";
 import TimeDate from "./Components/TimeDate.jsx";
 import GetBySykkelData from "./Components/GetBySykkelData.jsx";
 import GetBusData from "./Components/GetBusData.jsx";
-import themechanger from "./Components/ThemeChanger.jsx";
+import useTheme from "./Components/useTheme.jsx";
 
 function App() {
-  const [theme, setTheme] = themechanger();
+  const [theme, setTheme] = useTheme();
   return (
     <AppProvider>
       <>
