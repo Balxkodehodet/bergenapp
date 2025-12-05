@@ -17,8 +17,8 @@ function App() {
         <TimeDate />
         <button onClick={() => setTheme("light")}>Set light Theme</button>
         <button onClick={() => setTheme("dark")}>Set dark Theme</button>
-        <GetBusData />
         <GetBySykkelData />
+        <GetBusData />
         <Footer />
       </>
     </AppProvider>
